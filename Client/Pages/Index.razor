@@ -1,7 +1,67 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Current Weather Forecast</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Weather at your location</h1>
 
-Welcome to your new app.
+<div>
+    <input type="text" @bind="@ZipCode" placeholder="Enter Zip Code" />
+    <button @onclick="GetWeather">Get Weather</button>
+</div>
+<div>
+    @if (WeatherData != null)
+    {
+        <h2>Weather Information</h2>
+        <p>Location: @WeatherData.LocationName</p>
+        <p>Temperature (F): @WeatherData.Temperature</p>
+        <p>Current Conditions: @WeatherData.CurrentConditions</p>
+        <p>Wind Direction: @WeatherData.WindDirection</p>
+        <p>Wind Speed: @WeatherData.WindSpeed</p>
+    }
+</div>
+
+@code {
+    private string? ZipCode { get; set; }
+    private Weather WeatherData { get; set; }
+
+    private async Task GetWeather()
+    {
+        // Make API call and get weather data based on the zip code
+        // Replace the API_URL with the actual API endpoint URL
+        string? apiBaseUrl = Environment.GetEnvironmentVariable("BASE_ADDRESS");
+        Uri baseUrl;
+        if (string.IsNullOrEmpty(apiBaseUrl))
+        {
+            baseUrl = new Uri("http://localhost:7071/");
+        }
+        else
+        {
+            baseUrl = new Uri(apiBaseUrl);
+        }
+
+        Uri apiUrl = new Uri(baseUrl, $"api/GetWeatherByZipCode?zipCode={ZipCode}");
+
+        using (HttpClient client = new HttpClient())
+        {
+            try {
+                HttpResponseMessage response = await client.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    WeatherData = await response.Content.ReadFromJsonAsync<Weather>();
+                }
+                else
+                {
+                    // Handle error case
+                    WeatherData = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Handle exception
+                WeatherData = null;
+            }
+        }
+    }
+}
