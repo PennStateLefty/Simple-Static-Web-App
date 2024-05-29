@@ -1,4 +1,5 @@
-﻿@page "/"
+﻿@inject NavigationManager navigationManager
+@page "/"
 
 <PageTitle>Current Weather Forecast</PageTitle>
 
@@ -32,7 +33,7 @@
         Uri baseUrl;
         if (string.IsNullOrEmpty(apiBaseUrl))
         {
-            baseUrl = new Uri("https://172.206.117.185/");
+            baseUrl = new Uri(navigationManager.BaseUri ?? string.Empty);
         }
         else
         {
@@ -48,7 +49,7 @@
 
                 if (response.IsSuccessStatusCode)
                 {
-                    WeatherData = await response.Content.ReadFromJsonAsync<Weather>();
+                    WeatherData = Weather.FromJson(response.Content.ToString());
                 }
                 else
                 {
