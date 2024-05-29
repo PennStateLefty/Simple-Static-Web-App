@@ -30,15 +30,7 @@
         // Make API call and get weather data based on the zip code
         // Replace the API_URL with the actual API endpoint URL
         string? apiBaseUrl = Environment.GetEnvironmentVariable("BASE_ADDRESS");
-        Uri baseUrl;
-        if (string.IsNullOrEmpty(apiBaseUrl))
-        {
-            baseUrl = new Uri(navigationManager.BaseUri ?? string.Empty);
-        }
-        else
-        {
-            baseUrl = new Uri(apiBaseUrl);
-        }
+        Uri baseUrl = new Uri(navigationManager.BaseUri ?? string.Empty);
 
         Uri apiUrl = new Uri(baseUrl, $"api/GetWeatherByZipCode?zipCode={ZipCode}");
 
@@ -49,7 +41,7 @@
 
                 if (response.IsSuccessStatusCode)
                 {
-                    WeatherData = Weather.FromJson(response.Content.ToString());
+                    WeatherData = await response.Content.ReadFromJsonAsync<Weather>();
                 }
                 else
                 {
